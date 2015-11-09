@@ -1,0 +1,24 @@
+{
+  "name": "model-api",
+  "version": "1.0.0",
+  "description": "RESTfull API for mongoose model",
+  "main": "./lib/model-api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/DScheglov/model-api.git"
+  },
+  "keywords": [
+    "mongoose",
+    "rest",
+    "api"
+  ],
+  "author": "Dmitry Scheglov <dmitry.scheglov@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DScheglov/model-api/issues"
+  },
+  "homepage": "https://github.com/DScheglov/model-api#readme"
+}

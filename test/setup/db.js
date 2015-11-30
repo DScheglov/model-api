@@ -1,9 +1,8 @@
 var async = require('async')
 var mongoose = require('mongoose')
 var util = require('util')
-var dbName = mongoose.Types.ObjectId();
 var people = require("./fixtures/people");
-
+var dbName = mongoose.Types.ObjectId();
 var schemas = require('./schemas').schemas;
 
 module.exports = function () {
@@ -27,7 +26,7 @@ module.exports = function () {
 
   function close (callback) {
 	mongoose.connection.db.dropDatabase();
-    mongoose.connection.close(callback);
+	mongoose.connection.close(callback);
   }
 
   return {

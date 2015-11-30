@@ -10,7 +10,7 @@ module.exports = exports = [
 	    "_id" : ObjectId("564e0da0105badc887ef1d3f"),
 	    "firstName" : "Alexander",
 	    "lastName" : "Pushkin",
-	    "email" : "A.S.Pushkin@authors.ru"
+	    "email" : "a.s.pushkin@authors.ru"
 	}, {
 	    "_id" : ObjectId("564e0da0105badc887ef1d40"),
 	    "firstName" : "Jack",

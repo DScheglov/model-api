@@ -8,35 +8,32 @@ var testPort = 30023;
 var testUrl = 'http://localhost:' + testPort;
 
 module.exports = exports = function (create, setup, dismantle) {
-	var app = create();	
+	
 	var server; 
 	var Person;
-	
-    beforeEach(function (done) {
-        setup(function (err) {
-          
-          if (err) {
-            return done(err)
-          }
-          Person = mongoose.models.Person;
-	  	  ModelAPI.assign(app, "/api", "v1");
-		  ModelAPI.expose(Person, {});
-		  ModelAPI.implement();
-		  app.use(function (err) {
-			  
-		  });
-		  server = app.listen(testPort, done);
-		  //done();
-        });
-      });
 
-      afterEach(function (done) {
-        dismantle(app, server, done)
-      })
+	describe("Simplest API use. Rest Full", function (done) {
+		var app = create();
+		beforeEach(function (done) {
+	        setup(function (err) {
+	          
+	          if (err) {
+	            return done(err)
+	          }
+	          Person = mongoose.models.Person;
+		  	  ModelAPI.assign(app, "/api", "v1");
+			  ModelAPI.expose(Person, {});
+			  ModelAPI.implement();
+			  server = app.listen(testPort, done);
+	        });
+		});
 
-      describe("Simplest API use. Rest Full", function (done) {
+		afterEach(function (done) {
+			dismantle(app, server, done)
+		});
     	  
-    	  it("OPTIONS /api/v1 200 -- get options for all API", function (done) {
+    	  
+    	it("OPTIONS /api/v1 200 -- get options for all API", function (done) {
 			request.post({
 				url: util.format('%s/api/v1', testUrl),
 				headers: {
@@ -110,6 +107,77 @@ module.exports = exports = function (create, setup, dismantle) {
 		      });
 		});
 		
+		it("POST /api/v1/people/search 200 -- searching for a person by mail (no results)", function (done){
+			request.post({
+		        url: util.format('%s/api/v1/people/search', testUrl),
+		        json: {		          
+		          email: "john.johnson@i.ua"
+		        }
+		      }, function (err, res, body) {
+		    	assert.ok(!err);  
+		        assert.equal(res.statusCode, 200);
+		        if (typeof(body) == "string") {
+		        	body = JSON.parse(body);
+		        }
+		        assert.equal(body.length, 0);
+		        done();
+		      });
+		});
+		
+		it("POST /api/v1/people/search 200 -- searching for a person by mail (one result)", function (done){
+			request.post({
+		        url: util.format('%s/api/v1/people/search', testUrl),
+		        json: {		          
+		          email: "a.s.pushkin@authors.ru"
+		        }
+		      }, function (err, res, body) {
+		    	assert.ok(!err);  
+		        assert.equal(res.statusCode, 200);
+		        if (typeof(body) == "string") {
+		        	body = JSON.parse(body);
+		        }
+		        assert.equal(body.length, 1);
+		        assert.equal(body[0].firstName, "Alexander");
+		        assert.equal(body[0].lastName, "Pushkin");
+		        done();
+		      });
+		});
+		
+		it("POST /api/v1/people/search 200 -- searching for people (many results)", function (done){
+			request.post({
+		        url: util.format('%s/api/v1/people/search', testUrl),
+		        json: {		          
+		          firstName: {$ne: "Alexander"}
+		        }
+		      }, function (err, res, body) {
+		    	assert.ok(!err);  
+		        assert.equal(res.statusCode, 200);
+		        if (typeof(body) == "string") {
+		        	body = JSON.parse(body);
+		        }
+		        assert.equal(body.length, 3);
+		        body.forEach(function(p) {
+		        	assert.notEqual(p.firstName, "Alexander");
+		        })
+		        done();
+		      });
+		});
+		
+		it("GET /api/v1/people/search 405 -- try to search via GET-method", function (done){
+			request.get({
+		        url: util.format('%s/api/v1/people/search', testUrl),
+		        json: {		          
+		          firstName: {$ne: "Alexander"}
+		        }
+		      }, function (err, res, body) {
+		    	assert.ok(!err);  
+		        assert.equal(res.statusCode, 405);
+		        assert.ok(body.error);
+		        assert.equal(body.error, "Not supported");
+		        done();
+		      });
+		});
+		
 		it("GET /api/v1/people 200 -- get all people", function(done) {
 			request.get({
 		        url: util.format('%s/api/v1/people', testUrl)		        
@@ -138,7 +206,6 @@ module.exports = exports = function (create, setup, dismantle) {
 			        }
 			        assert.equal(body.firstName, p.firstName);
 			        assert.equal(body.lastName, p.lastName);
-			        assert.equal(body.fullName, p.fullName);
 			        assert.equal(body.email, p.email.toLowerCase());
 			        done();
 			    });
@@ -162,13 +229,11 @@ module.exports = exports = function (create, setup, dismantle) {
 			        }
 			        assert.equal(body.firstName, p.firstName);
 			        assert.equal(body.lastName, p.lastName);
-			        assert.equal(body.fullName, p.fullName);
 			        assert.equal(body.email, "new.mail@server.com");
 			        Person.findById(p._id, function (err, p1) {
 			        	assert.ok(!err);
 				        assert.equal(p1.firstName, p.firstName);
 				        assert.equal(p1.lastName, p.lastName);
-				        assert.equal(p1.fullName, p.fullName);
 				        assert.equal(p1.email, "new.mail@server.com");
 				        done();
 			        });
@@ -249,6 +314,62 @@ module.exports = exports = function (create, setup, dismantle) {
 		        assert.equal(body.error, "Not found");
 		        done();
 		    });
+		});
+		
+		it("POST /api/v1/people/count 405 -- trying to call not implemented method", function (done){
+			request.post({
+		        url: util.format('%s/api/v1/people/count', testUrl),
+		      }, function (err, res, body) {
+		    	
+		    	assert.ok(!err);  
+		        assert.equal(res.statusCode, 405);
+		        if (typeof(body) == "string") {
+		        	body = JSON.parse(body);
+		        }
+		        assert.ok(body.error);
+		        assert.equal(body.error, "Not supported");
+		        done();
+		      });
+		});
+		
+	});
+	
+	describe("Searching by GET-method", function (done) {
+		var app = create();
+		beforeEach(function (done) {
+	        setup(function (err) {
+	          
+	          if (err) {
+	            return done(err)
+	          }
+	          Person = mongoose.models.Person;
+		  	  ModelAPI.assign(app, "/api", "v1");
+			  ModelAPI.expose(Person, {
+				  searchMethod: "get"
+			  });
+			  ModelAPI.implement();
+			  server = app.listen(testPort, done);
+	        });
+		});
+
+		afterEach(function (done) {
+			dismantle(app, server, done)
+		});
+		
+		it("GET /api/v1/people/search 200 -- searching for a person by mail (one result)", function (done){
+			request.get({
+		        url: util.format('%s/api/v1/people/search?email=a.s.pushkin@authors.ru', testUrl)
+		      }, function (err, res, body) {
+		    	assert.ok(!err);  
+		        assert.equal(res.statusCode, 200);
+		        if (typeof(body) == "string") {
+		        	body = JSON.parse(body);
+		        }
+		        assert.equal(body.length, 1);
+		        assert.equal(body[0].firstName, "Alexander");
+		        assert.equal(body[0].lastName, "Pushkin");
+		        done();
+		      });
 		});
 		
 	});

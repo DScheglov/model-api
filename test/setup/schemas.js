@@ -6,9 +6,6 @@ var PersonSchema = new Schema({
 	firstName: {type: String, required: true},
 	lastName: {type: String, required: true},
 	email: {type: String, required: true, index: true, unique: true}
-}, {
-	toObject: {virtuals: true},
-	toJSON: {virtuals: true}
 });
 
 PersonSchema
@@ -29,7 +26,6 @@ PersonSchema
 PersonSchema
 	.path("email")
 		.set(function(v) {
-			
 			return v.toLowerCase();
 		});
 

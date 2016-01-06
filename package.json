@@ -1,6 +1,6 @@
 {
   "name": "model-api",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "RESTfull API for mongoose model",
   "main": "./lib/model-api.js",
   "scripts": {

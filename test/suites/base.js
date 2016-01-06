@@ -399,12 +399,12 @@ module.exports = exports = function (create, setup, dismantle) {
 		});
 
 		afterEach(function (done) {
-			dismantle(app, server, done)
+			dismantle(app, server, done);
 		});
 		
-		it("GET /api/v1/people/search 200 -- searching for a person by mail (one result)", function (done){
+		it("GET /api/v1/people/ 200 -- searching for a person by mail (one result)", function (done){
 			request.get({
-		        url: util.format('%s/api/v1/people/search?email=a.s.pushkin@authors.ru', testUrl)
+		        url: util.format('%s/api/v1/people/?email=a.s.pushkin@authors.ru', testUrl)
 		      }, function (err, res, body) {
 		    	assert.ok(!err);  
 		        assert.equal(res.statusCode, 200);

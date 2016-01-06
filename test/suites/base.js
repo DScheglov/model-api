@@ -18,8 +18,8 @@ module.exports = exports = function (create, setup, dismantle) {
 	        setup(function (err) {
 	          
 	          if (err) {
-	            return done(err)
-	          }
+	            return done(err);
+	          };
 	          Person = mongoose.models.Person;
 		  	  ModelAPI.assign(app, "/api", "v1");
 			  ModelAPI.expose(Person, {});
@@ -29,7 +29,7 @@ module.exports = exports = function (create, setup, dismantle) {
 		});
 
 		afterEach(function (done) {
-			dismantle(app, server, done)
+			dismantle(app, server, done);
 		});
     	  
     	  
@@ -241,6 +241,28 @@ module.exports = exports = function (create, setup, dismantle) {
 			});
 		});
 		
+		it("POST /api/v1/people/:id 500 -- trying to update the specific Person with invalid data", function(done) {
+			Person.findOne({}, function (err, p) {
+				assert.ok(!err);
+				assert.ok(p._id);
+				request.post({
+			        url: util.format('%s/api/v1/people/%s', testUrl, p._id),
+			        json: {
+			        	email: null
+			        }
+			      }, function (err, res, body) {
+			    	assert.ok(!err);  
+			        assert.equal(res.statusCode, 500);
+			        if (typeof(body) == "string") {
+			        	body = JSON.parse(body);
+			        }
+			        assert.equal(body.error, "Person validation failed");
+			        done();
+			    });
+			});
+		});
+		
+		
 		it("DELETE /api/v1/people/:id 200", function(done) {
 			Person.findOne({}, function (err, p) {
 				assert.ok(!err);
@@ -296,6 +318,25 @@ module.exports = exports = function (create, setup, dismantle) {
 		        assert.equal(body.error, "Not found");
 		        done();
 		    });
+		});
+
+		it("POST /api/v1/people/ 401 -- failing to update a specific Person by using interface of create-method", function(done) {
+			Person.findOne({}, function (err, p) {
+				assert.ok(!err);
+				assert.ok(p._id)
+				request.post({
+			        url: util.format('%s/api/v1/people/', testUrl),
+			        json: p.toJSON()
+			      }, function (err, res, body) {
+			    	assert.ok(!err);  
+			        assert.equal(res.statusCode, 401);
+			        if (typeof(body) == "string") {
+			        	body = JSON.parse(body);
+			        }
+			        assert.equal(body.error, "Use post ~/people/"+p._id+" to update a(n) Person");
+			        done();
+			    });
+			});
 		});
 		
 		it("DELETE /api/v1/people/:id 404 -- try to delete Person by unexisting id", function(done) {

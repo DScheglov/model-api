@@ -28,6 +28,55 @@ PersonSchema
 		.set(function(v) {
 			return v.toLowerCase();
 		});
+PersonSchema.methods.toUpperCase = function(req, callback) {
+	this.firstName = this.firstName.toUpperCase();
+	this.lastName = this.lastName.toUpperCase();
+	this.save(function (err) {
+		if (err) return callback(err, null);
+		callback(null, {status: "Ok"});
+	});
+}
+PersonSchema.methods.Reverse = function(req, callback) {
+	this.firstName = this.firstName.split("").reverse().join("");
+	this.lastName = this.lastName.split("").reverse().join("");
+	this.save(function (err) {
+		if (err) return callback(err, null);
+		callback(null, {status: "Ok"});
+	});	
+}
+
+PersonSchema.statics.Reverse = function(req, callback) {
+	this.firstName = this.firstName.split("").reverse().join("");
+	this.lastName = this.lastName.split("").reverse().join("");
+	this.save(function (err) {
+		if (err) return callback(err, null);
+		callback(null, {status: "Ok"});
+	});	
+}
+
+PersonSchema.statics.toUpperCase = function(req, callback) {
+	this.find().exec(function(err, results) {
+		if (err) return callback(err, null);
+		async.each(results, function(item, next) {
+			item.toUpperCase(req, next);
+		}, function(err) {
+			if (err) return callback(err, null);
+			callback(null, {status: "Ok"});
+		});
+	});
+}
+
+PersonSchema.statics.Reverse = function(req, callback) {
+	this.find().exec(function(err, results) {
+		if (err) return callback(err, null);
+		async.each(results, function(item, next) {
+			item.Reverse(req, next);
+		}, function(err) {
+			if (err) return callback(err, null);
+			callback(null, {status: "Ok"});
+		});
+	});
+}
 
 var BookSchema = new Schema({
 	title: {type: String, required: true, index: true},

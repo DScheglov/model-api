@@ -43,6 +43,7 @@ function runTests (createFn) {
 	  require('./suites/fields-restrictions')(createFn, setup, dismantle);
 	  require('./suites/skip-limit-sort')(createFn, setup, dismantle);
 	  require('./suites/methods')(createFn, setup, dismantle);
+	  require('./suites/rootPath')(createFn, setup, dismantle);
   })
 }
 

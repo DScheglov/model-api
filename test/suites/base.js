@@ -158,7 +158,7 @@ module.exports = exports = function (create, setup, dismantle) {
 		        assert.equal(body.length, 3);
 		        body.forEach(function(p) {
 		        	assert.notEqual(p.firstName, "Alexander");
-		        })
+		        });
 		        done();
 		      });
 		});
@@ -195,7 +195,7 @@ module.exports = exports = function (create, setup, dismantle) {
 		it("GET /api/v1/people/:id 200 -- get a specific Person", function(done) {
 			Person.findOne({}, function (err, p) {
 				assert.ok(!err);
-				assert.ok(p._id)
+				assert.ok(p._id);
 				request.get({
 			        url: util.format('%s/api/v1/people/%s', testUrl, p._id)		        
 			      }, function (err, res, body) {
@@ -215,7 +215,7 @@ module.exports = exports = function (create, setup, dismantle) {
 		it("POST /api/v1/people/:id 200 -- update a specific Person", function(done) {
 			Person.findOne({}, function (err, p) {
 				assert.ok(!err);
-				assert.ok(p._id)
+				assert.ok(p._id);
 				request.post({
 			        url: util.format('%s/api/v1/people/%s', testUrl, p._id),
 			        json: {
@@ -241,22 +241,27 @@ module.exports = exports = function (create, setup, dismantle) {
 			});
 		});
 		
-		it("POST /api/v1/people/:id 500 -- trying to update the specific Person with invalid data", function(done) {
+		it("POST /api/v1/people/:id 422 -- trying to update the specific Person with invalid data", function(done) {
 			Person.findOne({}, function (err, p) {
 				assert.ok(!err);
 				assert.ok(p._id);
 				request.post({
 			        url: util.format('%s/api/v1/people/%s', testUrl, p._id),
 			        json: {
+			        	lastName: "",
 			        	email: null
 			        }
 			      }, function (err, res, body) {
 			    	assert.ok(!err);  
-			        assert.equal(res.statusCode, 500);
+			        assert.equal(res.statusCode, 422);
 			        if (typeof(body) == "string") {
 			        	body = JSON.parse(body);
 			        }
 			        assert.equal(body.error, "Person validation failed");
+			        assert.equal(body.errors.email.message,
+			        			 'Cast to String failed for value "null" at path "email"');
+			        assert.equal(body.errors.lastName.message,
+			        			 'Path `lastName` is required.');
 			        done();
 			    });
 			});
@@ -266,7 +271,7 @@ module.exports = exports = function (create, setup, dismantle) {
 		it("DELETE /api/v1/people/:id 200", function(done) {
 			Person.findOne({}, function (err, p) {
 				assert.ok(!err);
-				assert.ok(p._id)
+				assert.ok(p._id);
 				request.post({
 			        url: util.format('%s/api/v1/people/%s', testUrl, p._id),
 					headers: {
@@ -323,7 +328,7 @@ module.exports = exports = function (create, setup, dismantle) {
 		it("POST /api/v1/people/ 401 -- failing to update a specific Person by using interface of create-method", function(done) {
 			Person.findOne({}, function (err, p) {
 				assert.ok(!err);
-				assert.ok(p._id)
+				assert.ok(p._id);
 				request.post({
 			        url: util.format('%s/api/v1/people/', testUrl),
 			        json: p.toJSON()
@@ -381,7 +386,7 @@ module.exports = exports = function (create, setup, dismantle) {
 	        setup(function (err) {
 	          
 	          if (err) {
-	            return done(err)
+	            return done(err);
 	          }
 	          Person = mongoose.models.Person;
 		  	  ModelAPI.assign(app, "/api", "v1");
@@ -414,4 +419,4 @@ module.exports = exports = function (create, setup, dismantle) {
 		});
 		
 	});
-}
+};

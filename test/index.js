@@ -44,6 +44,7 @@ function runTests (createFn) {
 	  require('./suites/skip-limit-sort')(createFn, setup, dismantle);
 	  require('./suites/methods')(createFn, setup, dismantle);
 	  require('./suites/rootPath')(createFn, setup, dismantle);
+    require('./suites/multi-model-exposing')(createFn, setup, dismantle);
   })
 }
 

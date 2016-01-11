@@ -346,5 +346,48 @@ module.exports = exports = function (create, setup, dismantle) {
   		});
 		
 	});
+
+	describe("Sorting, limiting and skiping with get method", function (done) {
+		var app = create();	
+		var server; 
+		var Person;
+	    before(function (done) {
+	        setup(function (err) {
+	          
+	          Person = mongoose.models.Person;
+		  	  ModelAPI.assign(app, "/api", "v1");
+			  ModelAPI.expose(Person, {
+				  sortFields: {
+					  email:true
+				  },
+				  searchMethod: "get"
+			  });
+			  ModelAPI.implement();
+
+			  server = app.listen(testPort, done);
+	        });
+	      });
+	    
+	      after(function (done) {
+	          dismantle(app, server, done)
+	      });
+    	  
+    	  it("Should return results ordered by email (allowed for sorting) ascending", function (done) {
+			request.get({
+				url: util.format('%s/api/v1/people?_sort=email&firstName=Taras', testUrl)
+			}, function (err, res, body) {
+			    assert.ok(!err);
+			    assert.equal(res.statusCode, 200);
+			    if (typeof(body) == "string") {
+			    	body = JSON.parse(body);
+			    }
+			    
+			    assert.equal(body.length, 1);
+			    done();
+			});
+
+		});
+		
+	});
 	
 };

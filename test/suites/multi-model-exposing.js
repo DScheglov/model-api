@@ -1,4 +1,4 @@
-var ModelAPI = require("../../lib/model-api");
+var ModelAPI = require("../../lib/model-api")();
 var mongoose = require('mongoose');
 var request = require("request");
 var util = require("util");

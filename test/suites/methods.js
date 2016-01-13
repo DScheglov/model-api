@@ -1,4 +1,4 @@
-var ModelAPI = require("../../lib/model-api");
+var ModelAPI = require("../../lib/model-api")();
 var mongoose = require('mongoose');
 var request = require("request");
 var util = require("util");
@@ -52,6 +52,7 @@ module.exports = exports = function (create, setup, dismantle) {
 			        if (typeof(body) == "string") {
 			        	body = JSON.parse(body);
 			        }
+
 			        assert.equal(body.length, 8);
 			        var i;
 			        for (i=0; i<body.length; i++) {
@@ -331,5 +332,79 @@ module.exports = exports = function (create, setup, dismantle) {
 				    });
 				});
 			});
+	});
+
+	describe("Exposing static methods implicitly", function (done) {
+		var app = create();	
+		var server; 
+		var Person;  
+	    before(function (done) {
+	        setup(function (err) {
+	          
+	          if (err) {
+	            return done(err)
+	          }
+	          Person = mongoose.models.Person;
+		  	  ModelAPI.assign(app, "/api", "v1");
+			  ModelAPI.expose(Person, {
+				  exposeStatic: {
+					  "*": true
+				  }
+			  });
+			  ModelAPI.implement();
+			  server = app.listen(testPort, done);
+	        });
+	      });
+	    
+	      after(function (done) {
+	          dismantle(app, server, done)
+	      });
+    	
+	      it("OPTIONS /api/v1/people/ 200 -- should return urls for the exposed methods", function (done) {
+
+				request.post({
+					url: util.format('%s/api/v1/people', testUrl),
+					headers: {
+						"X-HTTP-Method-Override": "OPTIONS"
+					}
+				}, function (err, res, body) {
+			        assert.ok(!err);
+			        assert.equal(res.statusCode, 200);
+			        if (typeof(body) == "string") {
+			        	body = JSON.parse(body);
+			        }
+
+			        assert.equal(body.length, 8);
+			        var i;
+			        var emailListExposed = false;
+			        for (i=0; i<body.length && !emailListExposed; i++) {
+			        	emailListExposed = (
+			        			body[i][0] == "post /api/v1/people/email-list" && 
+			        			body[i][1] == "Person.statics.emailList"
+			        	); 
+			        }
+			        assert.ok(emailListExposed);
+			        done();
+				});
+	      });
+	      
+	      it("POST /api/v1/people/email-list 200 -- should return an ordered email-list", function(done) {
+				request.post({
+			        url: util.format('%s/api/v1/people/email-list', testUrl)
+			      }, function (err, res, body) {
+			    	assert.ok(!err);  
+			        assert.equal(res.statusCode, 200);
+			        if (typeof(body) == "string") {
+			        	body = JSON.parse(body);
+			        }
+			        assert.ok(body instanceof Array);
+			        assert.equal(body.length, 4);
+			        assert.deepEqual(body, ['t.shevchenko@heroes.ua',
+			        					'a.s.pushkin@authors.ru',
+			        					'jack.london@writers.uk',
+			        					'm-twen@legends.us'].sort());
+			        done();
+			    });
+		  });
 	});
 };

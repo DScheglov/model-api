@@ -36,6 +36,7 @@ PersonSchema.methods.toUpperCase = function(req, callback) {
 		callback(null, {status: "Ok"});
 	});
 }
+
 PersonSchema.methods.Reverse = function(req, callback) {
 	this.firstName = this.firstName.split("").reverse().join("");
 	this.lastName = this.lastName.split("").reverse().join("");
@@ -45,36 +46,11 @@ PersonSchema.methods.Reverse = function(req, callback) {
 	});	
 }
 
-PersonSchema.statics.Reverse = function(req, callback) {
-	this.firstName = this.firstName.split("").reverse().join("");
-	this.lastName = this.lastName.split("").reverse().join("");
-	this.save(function (err) {
-		if (err) return callback(err, null);
-		callback(null, {status: "Ok"});
-	});	
-}
 
-PersonSchema.statics.toUpperCase = function(req, callback) {
-	this.find().exec(function(err, results) {
+PersonSchema.statics.emailList = function(req, callback) {
+	this.find({}, {"email": true}).sort('email').exec(function(err, results) {
 		if (err) return callback(err, null);
-		async.each(results, function(item, next) {
-			item.toUpperCase(req, next);
-		}, function(err) {
-			if (err) return callback(err, null);
-			callback(null, {status: "Ok"});
-		});
-	});
-}
-
-PersonSchema.statics.Reverse = function(req, callback) {
-	this.find().exec(function(err, results) {
-		if (err) return callback(err, null);
-		async.each(results, function(item, next) {
-			item.Reverse(req, next);
-		}, function(err) {
-			if (err) return callback(err, null);
-			callback(null, {status: "Ok"});
-		});
+		callback(null, results.map(function (p) { return p.email;} ));
 	});
 }
 

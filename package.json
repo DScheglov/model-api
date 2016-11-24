@@ -1,7 +1,7 @@
 {
   "name": "model-api",
-  "version": "1.0.13",
-  "description": "RESTfull API for mongoose model",
+  "version": "1.0.14",
+  "description": "Deprecated. Use `merest` instead.",
   "main": "./lib/model-api.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

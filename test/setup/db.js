@@ -6,7 +6,6 @@ var dbName = mongoose.Types.ObjectId();
 var schemas = require('./schemas').schemas;
 
 module.exports = function () {
-  
 
   function initialize (callback) {
     mongoose.connect('mongodb://localhost/db'+dbName, callback)
